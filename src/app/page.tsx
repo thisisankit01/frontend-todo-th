@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Header from '@/components/Header'
-import Input from '@/components/TaskForm'
+import Input from '@/components/TaskInput'
 import Button from '@/components/Button'
 import { useMutation } from '@tanstack/react-query'
 import { addTask } from '@/lib/api'
@@ -10,60 +10,66 @@ import TaskList from '@/components/TaskList'
 import { useTasksQuery } from '@/hooks/useTasksQuery'
 import { motion } from 'framer-motion'
 import Alert from '@/components/Alert'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+
+interface FormData {
+	task: string
+}
 
 export default function Home() {
 	const { refetch } = useTasksQuery()
-	const [inputValue, setInputValue] = useState('')
-	const [isLoading, setIsLoading] = useState(false)
-	const [showSuccess, setShowSuccess] = useState(false)
+	const [isVisible, setIsVisible] = useState(true);
 
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setInputValue(e.target.value)
+	const schema = z.object({
+		task: z.string().nonempty({ message: 'Input cannot be empty' }),
+	  });
+
+	const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
+		resolver: zodResolver(schema),
+	  });
+	
+
+	const handleAddTask = (data : FormData) => {	
+		mutate(data.task)
+		reset()
 	}
 
-	const handleAddTask = () => {
-		if (inputValue.trim() === '') {
-			alert('Input cannot be empty')
-			return
-		}
-		setIsLoading(true)
-		mutate(inputValue)
-	}
-
-	const { mutate, error: addTasksError } = useMutation({
+	const { mutate, error: addTasksError, isSuccess: isaddTaskSuccess, isPending : isAddTaskPending } = useMutation({
 		mutationKey: ['addTasks'],
 		mutationFn: addTask,
 		onSuccess: () => {
-			setInputValue('')
-			setShowSuccess(true)
-			setIsLoading(false)
-			setTimeout(() => {
-				setShowSuccess(false)
-			}, 2000)
+			setIsVisible(true)
 			refetch()
+			setTimeout(() => {
+				setIsVisible(false);
+			  }, 3000);
 		},
 		onError: () => {
-			console.log('Error adding task')
-			setIsLoading(false)
+			setIsVisible(false)
+			
 		}
 	})
-
+	
 	return (
 		<div className="container py-8 flex justify-center items-center">
 			<div className="md:w-2/5 space-y-3 px-3">
 				<Header />
-				<div className="flex space-x-2">
-					<Input onChange={handleChange} value={inputValue} />
+				<form onSubmit={handleSubmit(handleAddTask)}>
+					<div className='flex space-x-2'>
+					<input {...register('task')} className="input-box"/>
 					<Button
 						className="px-10 bg-blue-700"
-						onClick={handleAddTask}
+						type='submit'
 					>
 						<span className="inline-flex w-max">Add Task</span>
 					</Button>
-				</div>
+					</div>
+				</form>
 				<TaskList />
 				{}
-				{showSuccess && (
+				{ isaddTaskSuccess && isVisible &&  (
 					<motion.div
 						initial={{ opacity: 0, y: -50 }}
 						animate={{ opacity: 1, y: 0 }}
@@ -74,7 +80,7 @@ export default function Home() {
 						Task added successfully!
 					</motion.div>
 				)}
-				{isLoading && (
+				{isAddTaskPending && (
 					<div className="flex justify-center items-center">
 						<div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
 					</div>

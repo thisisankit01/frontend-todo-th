@@ -1,10 +1,12 @@
 import { TODOIST_API_BASE_URL } from '@/constants/constants'
 import axios from 'axios'
 
+const API_TOKEN = process.env.NEXT_PUBLIC_TODOIST_API_KEY
+
 const todoistApi = axios.create({
 	baseURL: TODOIST_API_BASE_URL,
 	headers: {
-		Authorization: `Bearer 05bee2fbd55ef1e11666bb3f6a52608b849a94d9`
+		Authorization: `Bearer ${API_TOKEN}`
 	}
 })
 
