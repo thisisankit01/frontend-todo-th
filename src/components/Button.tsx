@@ -2,15 +2,15 @@ import React, { SVGProps } from 'react'
 
 interface ButtonProps {
 	className?: string
-	text: string
 	onClick?: () => void
-	type?: 'button' | 'submit' | 'reset' // Add this line
+	children?: React.ReactNode
+	disabled?: boolean
 }
 
 const Button: React.FC<ButtonProps> = ({
-	text,
 	onClick,
 	className,
+	children,
 	...rest
 }) => {
 	return (
@@ -18,8 +18,9 @@ const Button: React.FC<ButtonProps> = ({
 			{...rest}
 			className={`${className} text-white focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center items-center me-2 `}
 			onClick={onClick}
+			disabled={rest.disabled}
 		>
-			<span className="inline-flex w-max">{text}</span>
+			{children}
 		</button>
 	)
 }

@@ -39,3 +39,13 @@ export const deleteTask = async (taskId: string) => {
 		throw error
 	}
 }
+
+export const closeTask = async (taskId: string) => {
+	try {
+		const response = await todoistApi.post(`/tasks/${taskId}/close`)
+		return response.status
+	} catch (error) {
+		console.error('Error closing task:', error)
+		throw error
+	}
+}

@@ -2,10 +2,10 @@ import React from 'react'
 import TaskItem from './TodoCard'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
-import { deleteTask, getTasks } from '@/lib/api'
+import { closeTask, deleteTask, getTasks } from '@/lib/api'
 import { Todo } from '@/types/todo'
 import { useTasksQuery } from '@/hooks/useTasksQuery'
-import ErrorMessage from './ErrorMessage'
+import Alert from './Alert'
 
 const TaskList = () => {
 	const { refetch } = useTasksQuery()
@@ -16,9 +16,25 @@ const TaskList = () => {
 		staleTime: 0
 	})
 
-	const { mutate: deleteMutate, error: deleteTaskError } = useMutation({
+	const {
+		mutate: deleteMutate,
+		error: deleteTaskError,
+		isPending: isDeletePending
+	} = useMutation({
 		mutationKey: ['deleteTask'],
 		mutationFn: deleteTask,
+		onSuccess: () => {
+			refetch()
+		}
+	})
+
+	const {
+		mutate: closeTaskMutate,
+		error: closeTaskError,
+		isPending: isCloseTaskPending
+	} = useMutation({
+		mutationKey: ['closeTask'],
+		mutationFn: closeTask,
 		onSuccess: () => {
 			refetch()
 		}
@@ -28,13 +44,17 @@ const TaskList = () => {
 		deleteMutate(id)
 	}
 
+	const handleComplete = (id: string) => {
+		closeTaskMutate(id)
+	}
+
 	return (
 		<>
 			{todoLists?.length === 0 && (
 				<p className="text-center">No tasks available</p>
 			)}
 			{todoLists && todoLists?.length > 0 && (
-				<div className="py-3 border-black border-[1px] rounded-lg">
+				<div className="py-3 border-box border-[1px] rounded-lg">
 					<h1 className="px-3 pb-2 text-2xl">Tasks</h1>
 					<div className="overflow-y-auto max-h-96 py-4">
 						{isFetchTodoLoading && (
@@ -60,6 +80,15 @@ const TaskList = () => {
 												onDelete={() =>
 													handleDelete(todo?.id)
 												}
+												onComplete={() => {
+													handleComplete(todo?.id)
+												}}
+												isDeleteDisable={
+													isDeletePending
+												}
+												isCheckDisable={
+													isCloseTaskPending
+												}
 											/>
 										</div>
 									</motion.div>
@@ -68,7 +97,21 @@ const TaskList = () => {
 					</div>
 				</div>
 			)}
-			{deleteTaskError && <ErrorMessage message="Error Deleting Task" />}
+			{deleteTaskError && (
+				<Alert message="Error Deleting Task" type="error" />
+			)}
+			{closeTaskError && (
+				<Alert message="Error Closing Task" type="error" />
+			)}
+			{isDeletePending && (
+				<Alert message="Deleting Task..." type="warning" />
+			)}
+			{isCloseTaskPending && (
+				<Alert
+					message="Congratulation! Closing Task..."
+					type="success"
+				/>
+			)}
 		</>
 	)
 }

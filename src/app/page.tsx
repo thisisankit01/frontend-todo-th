@@ -9,7 +9,7 @@ import { addTask } from '@/lib/api'
 import TaskList from '@/components/TaskList'
 import { useTasksQuery } from '@/hooks/useTasksQuery'
 import { motion } from 'framer-motion'
-import ErrorMessage from '@/components/ErrorMessage'
+import Alert from '@/components/Alert'
 
 export default function Home() {
 	const { refetch } = useTasksQuery()
@@ -56,9 +56,10 @@ export default function Home() {
 					<Input onChange={handleChange} value={inputValue} />
 					<Button
 						className="px-10 bg-blue-700"
-						text="Add Task"
 						onClick={handleAddTask}
-					/>
+					>
+						<span className="inline-flex w-max">Add Task</span>
+					</Button>
 				</div>
 				<TaskList />
 				{}
@@ -79,7 +80,9 @@ export default function Home() {
 					</div>
 				)}
 			</div>
-			{addTasksError && <ErrorMessage message="Error adding task" />}
+			{addTasksError && (
+				<Alert message={addTasksError.message} type="error" />
+			)}
 		</div>
 	)
 }
