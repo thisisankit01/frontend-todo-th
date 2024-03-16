@@ -1,12 +1,10 @@
-import React, { useState } from 'react'
+import React from 'react'
 import TaskItem from './TodoCard'
-import { QueryClient, useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { deleteTask, getTasks } from '@/lib/api'
 import { Todo } from '@/types/todo'
 import { useTasksQuery } from '@/hooks/useTasksQuery'
-import Input from './TaskForm'
-import Button from './Button'
 import ErrorMessage from './ErrorMessage'
 
 const TaskList = () => {
