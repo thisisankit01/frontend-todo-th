@@ -1,11 +1,18 @@
+"use client"
+
 import React from 'react'
+import { useState, useEffect } from 'react'
+import { message_duration } from '@/constants/constants'
+
+
 
 interface AlertProps {
 	message: string
 	type: 'info' | 'success' | 'warning' | 'error'
+    message_duration?: number
 }
 
-const Alert: React.FC<AlertProps> = ({ message, type }) => {
+const AlertStructure: React.FC<AlertProps> = ({ message, type }) => {
 	let bgColor, textColor
 
 	switch (type) {
@@ -40,4 +47,20 @@ const Alert: React.FC<AlertProps> = ({ message, type }) => {
 	)
 }
 
-export default Alert
+const Alert = ({ message, type, message_duration = 3000 } : AlertProps) => {
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsVisible(false);
+    }, message_duration);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [message_duration]);
+
+  return isVisible ? <AlertStructure message={message} type={type} /> : null;
+};
+
+export default Alert;
